@@ -34,15 +34,11 @@ geyser_metrics(faithful$waiting)
 
 #3a
 print("-- 3a --")
-library("plyr") 
-
 iris = read.csv("iris.data")
 
-uniqueSpecies <- length(unique(iris$Species))
-cat("# unique species", uniqueSpecies, Sep="\n")
-
-speciesCount <- count(iris, "Species")
-print(speciesCount)
+speciesCounts = summary(iris$Species)
+cat("# unique species", length(speciesCounts), Sep="\n")
+print(speciesCounts)
 
 #3b
 plot(iris$Sepal.length, iris$Petal.length, main="All Species: Petal length vs. Sepal length", xlab="Sepal Length", ylab="Petal Length")
@@ -59,6 +55,7 @@ points(setosa$Sepal.length, setosa$Petal.length, col="red")
 m <- matrix(runif(50* 100), 50, 100)
 correlation <- cor(m)
 # Two or one histograms for this task?
+hist(correlation)
 hist(correlation, breaks=100, xlim=range(-0.6, 0.6), col="blue")
 
 #5 

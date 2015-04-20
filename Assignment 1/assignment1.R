@@ -52,8 +52,8 @@ setosa <- subset(iris, Species == "Iris-setosa")
 plot(setosa$Sepal.length, setosa$Petal.length, main="Iris Setosa: Petal length vs. Sepal length", xlab="Sepal Length", ylab="Petal Length")
 
 #3d
-plot(iris$Sepal.length, iris$Petal.length, main="All Species: Petal length vs. Sepal length", xlab="Sepal Length", ylab="Petal Length", col="red")
-points(setosa, col="blue")
+plot(iris$Sepal.length, iris$Petal.length, main="All Species: Petal length vs. Sepal length", xlab="Sepal Length", ylab="Petal Length", col="blue")
+points(setosa$Sepal.length, setosa$Petal.length, col="red")
 
 #4
 m <- matrix(runif(50* 100), 50, 100)

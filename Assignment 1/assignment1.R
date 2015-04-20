@@ -66,3 +66,18 @@ age <- c(16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27)
 height <- c(76.2, 77.1, 78.1, 78.4, 78.8, 79.7, 79.7, 81.1, 81.2, 81.4, 82.8, 83.5)
 plot(height~age)
 abline(lm(height~age))
+
+# Bonus task 1
+totalPositives = 13
+totalNegatives = 6
+truePositives = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 10, 10, 11, 11, 12, 12, 13)
+falsePositives = c(0, 0, 1, 1, 1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 5, 5, 6, 6)
+
+tpRate = truePositives / totalPositives
+fpRate = falsePositives / totalNegatives
+
+plot(fpRate, tpRate,
+     main="Bonus Assignment 1: ROC curve",
+     xlab="False Positive Rate",
+     ylab="True Positive Rate")
+lines(fpRate, tpRate)

@@ -28,9 +28,10 @@ data2 <- dbinom(x, 100, 1/2)
 data3 <- dbinom(x, 1000, 1/2)
 data4 <- dbinom(x, 10000, 1/2)
 
-plot(data2, col="green")
-points(data3, col="red")
-points(data4, col="blue")
+plot(data2, type="n")
+lines(data2, col="green")
+lines(data3, col="red")
+lines(data4, col="blue")
 
 # 2c
 empVar <- function(values) {
@@ -40,10 +41,10 @@ empVar <- function(values) {
 }
 
 metrics <- function(val) {
-  mean(val)
-  median(val)
-  empVar(val)
-  var(val)
+  print(mean(val))
+  print(median(val))
+  print(empVar(val))
+  print(var(val))
 }
 
 metrics(data1$counts)
@@ -68,7 +69,7 @@ pt(z,df=n-1)
 
 #7
 #a
-values <- c(1/6, 1/6, 1/6, 1/6, 1/6, 1/6)
+values <- replicate(6, 1/6)
 -sum(sapply(values, function(x) { x * log(x)}))
 
 #b

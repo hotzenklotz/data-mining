@@ -42,16 +42,17 @@ mapply(each(mean, median, empVar, var), data.frame(
 )
 
 # 2c
-# TODO georg
-x <- seq(1, 1000)
-data2 <- dbinom(x, 100, 1/2)
-data3 <- dbinom(x, 1000, 1/2)
-data4 <- dbinom(x, 10000, 1/2)
+par(mfrow=c(1,3))
+plotMassFunction = function(n) {
+  values = dbinom(seq(1, n), n, 1/2)
+  plot(values, type="s", main=paste("n =", n),
+       xlab="Random Variable",
+       ylab="Probability Mass Function")
+}
 
-plot(data2, type="n")
-lines(data2, col="green")
-lines(data3, col="red")
-lines(data4, col="blue")
+plotMassFunction(100)
+plotMassFunction(1000)
+plotMassFunction(10000)
 
 #3 
 uniDist <- runif(100000)

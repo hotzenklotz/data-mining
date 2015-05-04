@@ -20,20 +20,9 @@ var(values)
 # 2a
 # Nicht sicher ob das Histgram so richtig ist oder die axen getauscht werden sollten?
 binom <- rbinom(1000, 100, 1/2)
-data1 = hist(binom, breaks=1000)
+data1 = hist(binom, breaks=seq(min(binom), max(binom)))
 
 # 2b
-x <- seq(1, 1000)
-data2 <- dbinom(x, 100, 1/2)
-data3 <- dbinom(x, 1000, 1/2)
-data4 <- dbinom(x, 10000, 1/2)
-
-plot(data2, type="n")
-lines(data2, col="green")
-lines(data3, col="red")
-lines(data4, col="blue")
-
-# 2c
 empVar <- function(values) {
   mean <- mean(values)
   factor = 1 / length(values)
@@ -47,10 +36,19 @@ metrics <- function(val) {
   print(var(val))
 }
 
-metrics(data1$counts)
-metrics(data2)
-metrics(data3)
-metrics(data4)
+metrics(binom)
+
+# 2c
+# TODO georg
+x <- seq(1, 1000)
+data2 <- dbinom(x, 100, 1/2)
+data3 <- dbinom(x, 1000, 1/2)
+data4 <- dbinom(x, 10000, 1/2)
+
+plot(data2, type="n")
+lines(data2, col="green")
+lines(data3, col="red")
+lines(data4, col="blue")
 
 #3 
 uniDist <- runif(100000)
@@ -69,6 +67,12 @@ graphs <- function(dist, means) {
 
 graphs(uniDist, uniMeans)
 graphs(normDist, normMeans)
+
+# 4d
+algoA <- c(0.90, 0.87, 0.92, 0.88, 0.90, 0.85, 0.91, 0.90, 0.87, 0.95, 0.90)
+algoB <- c(0.89, 0.95, 0.87, 0.94, 0.92, 0.86, 0.84, 0.92, 0.88, 0.83, 0.90)
+
+summary(lm(algoA ~algoB))
 
 #5 
 meanDiameter = 2.012

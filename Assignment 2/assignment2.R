@@ -54,7 +54,21 @@ metrics(data4)
 
 #3 
 uniDist <- runif(100000)
-samples <- replicate(5000, function() { samples(uniDist, 100) })
+normDist <- rnorm(100000, 3, 5)
+
+uniMeans <- colMeans(replicate(5000, sample(uniDist, 100)))
+normMeans <- colMeans(replicate(5000, sample(normDist, 100)))
+
+graphs <- function(dist, means) {
+    par(mfrow=c(2,4))
+    hist(dist)
+    plot(density(dist))
+    hist(means)
+    plot(density(means))
+}
+
+graphs(uniDist, uniMeans)
+graphs(normDist, normMeans)
 
 #5 
 meanDiameter = 2.012
@@ -69,9 +83,14 @@ pt(z,df=n-1)
 
 #7
 #a
+entropy <- function(values) {
+  -sum(sapply(values, function(x) { x * log2(x)}))
+}
+
 values <- replicate(6, 1/6)
--sum(sapply(values, function(x) { x * log(x)}))
+entropy(values)
 
 #b
 values <- c(8/100, 15/100, 1/2, 4/100, 15/100, 8/100)
--sum(sapply(values, function(x) { x * log(x)}))
+entropy(values)
+

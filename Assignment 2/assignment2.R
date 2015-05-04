@@ -18,25 +18,28 @@ sampVar(values)
 var(values)
 
 # 2a
-# Nicht sicher ob das Histgram so richtig ist oder die axen getauscht werden sollten?
-binom <- rbinom(1000, 100, 1/2)
-data1 = hist(binom, breaks=seq(min(binom), max(binom)))
-
-# 2b
 empVar <- function(values) {
   mean <- mean(values)
   factor = 1 / length(values)
   factor * sum(sapply(values, function(x) { (mean - x)^2 }))
 }
 
-metrics <- function(val) {
-  print(mean(val))
-  print(median(val))
-  print(empVar(val))
-  print(var(val))
-}
+dist1 = rbinom(100, 100, 0.5)
+dist2 = rbinom(1000, 100, 0.5)
+dist3 = rbinom(10000, 100, 0.5)
 
-metrics(binom)
+par(mfrow=c(1,3))
+hist(dist1, main="Heads per 100 Flips")
+hist(dist2, main="Heads per 1000 Flips")
+hist(dist3, main="Heads per 1000 Flips")
+
+# 2b
+library("plyr")
+mapply(each(mean, median, empVar, var), data.frame(
+  "100 Flips" = dist1,
+  "1000 Flips" = dist2,
+  "10000 Flips" = dist3)
+)
 
 # 2c
 # TODO georg

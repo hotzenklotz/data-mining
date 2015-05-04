@@ -74,8 +74,21 @@ graphs(normDist, normMeans)
 # 4d
 algoA <- c(0.90, 0.87, 0.92, 0.88, 0.90, 0.85, 0.91, 0.90, 0.87, 0.95, 0.90)
 algoB <- c(0.89, 0.95, 0.87, 0.94, 0.92, 0.86, 0.84, 0.92, 0.88, 0.83, 0.90)
+k = 11
 
-summary(lm(algoA ~algoB))
+eabar = mean(algoA)
+ebbar = mean(algoB)
+dbar = eabar - ebbar
+
+s_d = sqrt(var(algoA) / k + var(algoB) / k)
+
+#4e
+y = (dbar) * sqrt(k) / s_d
+
+alpha = 1 - 0.95
+t = qt(1-alpha/2, df=(k-1))
+
+acceptH0 = abs(y) < t
 
 #5 
 meanDiameter = 2.012

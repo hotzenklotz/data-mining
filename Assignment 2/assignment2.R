@@ -60,8 +60,8 @@ normDist <- rnorm(100000, 3, 5)
 uniMeans <- colMeans(replicate(5000, sample(uniDist, 100)))
 normMeans <- colMeans(replicate(5000, sample(normDist, 100)))
 
+par(mfrow=c(2,4))
 graphs <- function(dist, means) {
-    par(mfrow=c(2,4))
     hist(dist)
     plot(density(dist))
     hist(means)

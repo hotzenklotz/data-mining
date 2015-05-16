@@ -1,0 +1,13 @@
+Customer,Textiles,Gifts,Price,Category
+x1,medium,few,medium,T
+x2,few,medium,low,N
+x3,medium,many,medium,TG
+x4,many,few,high,T
+x5,few,medium,high,G
+x6,many,medium,low,TG
+x7,few,many,low,G
+x8,medium,few,low,N
+x9,many,few,low,T
+x10,few,few,high,N
+x11,few,many,medium,G
+x12,many,many,high,TG

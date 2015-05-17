@@ -21,11 +21,11 @@ growTree = function(data) {
   }
   
   splitFeature = bestSplit(data)
-  literals = unique(allData[splitFeature])
+  literals = unique(allData[,splitFeature])
   children = NULL
   
   for (literal in literals) {
-    dataSubset = subset(allData, allData[splitFeature] == "medium")
+    dataSubset = subset(allData, allData[splitFeature] == literal)
     
     if (nrow(dataSubset) > 0) {
       children = c(children, growTree(dataSubset))

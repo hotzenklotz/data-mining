@@ -1,31 +1,26 @@
+library(plyr)
 
 allData = read.csv("data.csv")
+features = c("Textiles", "Gifts", "Price")
 
 homogeneous = function(data) {
   return(length(unique(data$Category)) == 1)
 }
 
 label = function(data) {
-  # Only called if catory is the same within data, so return that category
+  # TODO: return category of max frequency
   return(data[1,]$Category)
 }
 
 bestSplit = function(data) {
-  return(sample(c("Textiles", "Gifts", "Price"), 1))
-}
-
-
-best_split <- function(data, features) {
-  i_min <- 1
-  #f_best <- ""
+  maxGain <- 0
   
   for(feature in features) {
     
-    splits <- split(data, data[feature])
-    print(splits)
-    imp <- impurity(splits)
-    if (imp < i_min) {
-      i_min <- imp
+    splits <- split(data, data[[feature]])
+    imp <- impurity(data, splits)
+    if (imp > maxGain) {
+      maxGain <- imp
       f_best <- feature
     }
   }
@@ -33,27 +28,31 @@ best_split <- function(data, features) {
   f_best
 }
 
-impurity <- function(splits) {
+impurity <- function(data, splits) {
+  
+  splitRows = sapply(splits, nrow)
   
   # parent entropy
-  parent_frequencies <- count(d["category"])$freq / length(d$category)
+  parent_frequencies <- count(data$Category)$freq / nrow(data)
   parent_entropy <- entropy(parent_frequencies)
   
   # child entropies
   frequencies <- sapply(splits, function(s) {
-    frq <- count(s["category"])$freq / length(splits)
+    count(s$Category)$freq / nrow(s)
   })
   
+  weights = splitRows / sum(splitRows)
   child_entropies = sapply(frequencies, entropy)
-  weighted_average = sapply(frequencies, sum) * child_entropies 
+  weighted_average = sum(child_entropies * weights)
   
   # result
-  result <- parent_entropy - mean(weighted_average)
-  print(result)
-  result
+  return(parent_entropy - weighted_average)
 }
 
 entropy <- function(values) {
+  if (length(values) == 0) {
+    return(0)
+  }
   -sum(sapply(values, function(x) { x * log2(x)}))
 }
 
@@ -67,11 +66,11 @@ entropy <- function(values) {
 # - edgeValue Value of splitFeature as defined by the parent node
 
 leafNode = function(label, edgeValue, data) {
-  return(list(edgeValue=edgeValue, label=label, data=data))
+  return(list(edgeValue=edgeValue, label=label))
 }
 
 internalNode = function(splitFeature, children, edgeValue, data) {
-  return(list(edgeValue=edgeValue, data=data, splitFeature=splitFeature, children=children))
+  return(list(edgeValue=edgeValue, splitFeature=splitFeature, children=children))
 }
 
 growTree = function(data, edgeValue=NULL) {

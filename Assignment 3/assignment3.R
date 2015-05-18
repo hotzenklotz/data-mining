@@ -15,6 +15,49 @@ bestSplit = function(data) {
 }
 
 
+best_split <- function(data, features) {
+  i_min <- 1
+  #f_best <- ""
+  
+  for(feature in features) {
+    
+    splits <- split(data, data[feature])
+    print(splits)
+    imp <- impurity(splits)
+    if (imp < i_min) {
+      i_min <- imp
+      f_best <- feature
+    }
+  }
+  
+  f_best
+}
+
+impurity <- function(splits) {
+  
+  # parent entropy
+  parent_frequencies <- count(d["category"])$freq / length(d$category)
+  parent_entropy <- entropy(parent_frequencies)
+  
+  # child entropies
+  frequencies <- sapply(splits, function(s) {
+    frq <- count(s["category"])$freq / length(splits)
+  })
+  
+  child_entropies = sapply(frequencies, entropy)
+  weighted_average = sapply(frequencies, sum) * child_entropies 
+  
+  # result
+  result <- parent_entropy - mean(weighted_average)
+  print(result)
+  result
+}
+
+entropy <- function(values) {
+  -sum(sapply(values, function(x) { x * log2(x)}))
+}
+
+
 # Represent the decision tree by its root node.
 # 
 # Nodes have the following attributes:

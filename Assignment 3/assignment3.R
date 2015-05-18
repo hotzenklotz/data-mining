@@ -38,7 +38,7 @@ growTree = function(data, edgeValue=NULL) {
   }
   
   splitFeature = bestSplit(data)
-  literals = unique(allData[,splitFeature])
+  literals = unique(allData[[splitFeature]])
   children = list()
   
   for (literal in literals) {

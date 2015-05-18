@@ -1,18 +1,17 @@
 
 allData = read.csv("data.csv")
 
-# Dummy implementations for now
-
 homogeneous = function(data) {
-  return(F)
+  return(length(unique(data$Category)) == 1)
 }
 
 label = function(data) {
-  return("Gifts")
+  # Only called if catory is the same within data, so return that category
+  return(data[1,]$Category)
 }
 
 bestSplit = function(data) {
-  return("Textiles")
+  return(sample(c("Textiles", "Gifts", "Price"), 1))
 }
 
 
@@ -24,32 +23,33 @@ bestSplit = function(data) {
 # - label (only leaf nodes) Predicted class
 # - edgeValue Value of splitFeature as defined by the parent node
 
-leafNode = function(label, edgeValue) {
-  return(list(label=label, edgeValue=edgeValue))
+leafNode = function(label, edgeValue, data) {
+  return(list(edgeValue=edgeValue, label=label, data=data))
 }
 
-internalNode = function(splitFeature, children, edgeValue) {
-  return(list(splitFeature=splitFeature, children=children, edgeValue=edgeValue))
+internalNode = function(splitFeature, children, edgeValue, data) {
+  return(list(edgeValue=edgeValue, data=data, splitFeature=splitFeature, children=children))
 }
 
 growTree = function(data, edgeValue=NULL) {
+  
   if (homogeneous(data)) {
-    return(leafNode(label(data), edgeValue))
+    return(leafNode(label(data), edgeValue, data))
   }
   
   splitFeature = bestSplit(data)
   literals = unique(allData[,splitFeature])
-  children = NULL
+  children = list()
   
   for (literal in literals) {
-    dataSubset = subset(allData, allData[splitFeature] == literal)
+    dataSubset = subset(data, data[splitFeature] == literal)
     
     if (nrow(dataSubset) > 0) {
-      children = c(children, growTree(dataSubset, literal))
+      children[[length(children) + 1]] = growTree(dataSubset, literal)
     } else {
-      children = c(children, leafNode(label(dataSubset), literal))
+      children[[length(children) + 1]] = leafNode(label(data), literal, dataSubset)
     }
   }
   
-  return(internalNode(splitFeature, children, edgeValue))
+  return(internalNode(splitFeature, children, edgeValue, data))
 }

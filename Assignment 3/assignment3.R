@@ -88,20 +88,20 @@ growTree = function(data, edgeValue=NULL) {
 }
 
 tree_stats <- function(tree) {
-  nodes <- 0
+  nodes <- 1
   leaves <- 0
   
-  for (child in tree[["children"]]) {
-    if (child[["children"]]) {
+  for (child in tree$children) {
+    if ("children" %in% names(child)) {
       nodes <- nodes + 1
       subtree <- tree_stats(child)
-      nodes <- nodes + subtree[1]
-      leaves <- subtree[2]
+      nodes <- nodes + subtree$nodes
+      leaves <- leaves + subtree$leaves
     } else {
       leaves <- leaves + 1
     }
   }
-  return(c(nodes, leaves))
+  return(list(nodes=nodes, leaves=leaves))
 }
 
 ### Task 1 ###
@@ -110,6 +110,7 @@ features = c("Textiles", "Gifts", "Price")
 class_feature = "Category"
 
 tree <- growTree(allData)
+stats <- tree_stats(tree)
 print(tree)
 ##############
 

@@ -10,14 +10,14 @@ label = function(data) {
 }
 
 bestSplit = function(data) {
-  maxGain <- 0
+  iMin <- .Machine$double.max
   
   for(feature in features) {
     
     splits <- split(data, data[[feature]])
-    imp <- impurity(data, splits)
-    if (imp > maxGain) {
-      maxGain <- imp
+    imp <- impurity(splits)
+    if (imp < iMin) {
+      iMin <- imp
       f_best <- feature
     }
   }
@@ -25,15 +25,10 @@ bestSplit = function(data) {
   f_best
 }
 
-impurity <- function(data, splits) {
+impurity <- function(splits) {
   
   splitRows = sapply(splits, nrow)
   
-  # parent entropy
-  parent_frequencies <- count(data[class_feature])$freq / nrow(data)
-  parent_entropy <- entropy(parent_frequencies)
-  
-  # child entropies
   frequencies <- sapply(splits, function(s) {
     count(s[class_feature])$freq / nrow(s)
   })
@@ -42,8 +37,7 @@ impurity <- function(data, splits) {
   child_entropies = sapply(frequencies, entropy)
   weighted_average = sum(child_entropies * weights)
   
-  # result
-  return(parent_entropy - weighted_average)
+  weighted_average
 }
 
 entropy <- function(values) {

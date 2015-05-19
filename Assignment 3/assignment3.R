@@ -1,15 +1,12 @@
 library(plyr)
 
-allData = read.csv("data.csv")
-features = c("Textiles", "Gifts", "Price")
-
 homogeneous = function(data) {
-  return(length(unique(data$Category)) == 1)
+  return(nrow(unique(data[class_feature])) == 1)
 }
 
 label = function(data) {
   # TODO: return category of max frequency
-  return(data[1,]$Category)
+  return(data[1,][class_feature])
 }
 
 bestSplit = function(data) {
@@ -33,12 +30,12 @@ impurity <- function(data, splits) {
   splitRows = sapply(splits, nrow)
   
   # parent entropy
-  parent_frequencies <- count(data$Category)$freq / nrow(data)
+  parent_frequencies <- count(data[class_feature])$freq / nrow(data)
   parent_entropy <- entropy(parent_frequencies)
   
   # child entropies
   frequencies <- sapply(splits, function(s) {
-    count(s$Category)$freq / nrow(s)
+    count(s[class_feature])$freq / nrow(s)
   })
   
   weights = splitRows / sum(splitRows)
@@ -95,3 +92,12 @@ growTree = function(data, edgeValue=NULL) {
   
   return(internalNode(splitFeature, children, edgeValue, data))
 }
+
+### Task 1 ###
+allData = read.csv("data.csv")
+features = c("Textiles", "Gifts", "Price")
+class_feature = "Category"
+
+tree <- growTree(allData)
+print(tree)
+##############

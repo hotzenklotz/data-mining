@@ -1,4 +1,5 @@
 library(plyr)
+library(infotheo)
 
 homogeneous = function(data) {
   return(nrow(unique(data[class_feature])) == 1)
@@ -120,7 +121,14 @@ print(tree)
 ##############
 
 ### Task 2 ###
-allData = read.csv("winequality-white.csv")
+wineData = read.csv("winequality-white.csv")
+
+
+# discretize all the wine values (except quality) to avoid overfitting
+numCols = ncol(wineData)
+discreteData = discretize(wineData[1:numCols - 1])
+allData = data.frame(discreteData, wineData[numCols:numCols])
+
 features = c("fixed.acidity", "volatile.acidity", "citric.acid", "residual.sugar", "chlorides", "free.sulfur.dioxide", "total.sulfur.dioxide", "density", "pH", "sulphates", "alcohol")
 class_feature = "quality"
 

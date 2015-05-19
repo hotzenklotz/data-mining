@@ -123,9 +123,6 @@ treeStats <- function(tree) {
 }
 
 prediction = function(tree, data) {
-  TP = 0
-  TN = 0
-  
   walkTree = function(tree, dataItem) {
     if ("children" %in% names(tree)) {
       # Internal Nodes
@@ -144,18 +141,16 @@ prediction = function(tree, data) {
     }
   }
   
+  actual = c()
+  predicted = c()
+  
   for (i in 1:nrow(data)) {
     row = data[i,]
-    correctClass = row[[class_feature]]
-    predictedClass = walkTree(tree, row)
-    print(predictedClass)
-    
-    if (correctClass == predictedClass) {
-      TP = TP + 1
-    }
+    actual[[length(actual) + 1]] = row[[class_feature]]
+    predicted[[length(predicted) + 1]] = walkTree(tree, row)
   }
   
-  return(TP)
+  return(list(actual=actual, predicted=predicted))
 }
 
 # Takes a tree and clones it, except that it removes all leaves which
@@ -215,7 +210,23 @@ print(treeStats(prunedTree))
 
 ### Task 4 ###
 testData = allData[1:200,]
-stats = prediction(wineTree, testData)
+predictions = prediction(wineTree, testData)
+classes = unique(predictions$actual)
+
+stats = sapply(classes, function(class) {
+  predicted = stats$predicted == class
+  actual = stats$actual == class
+  
+  tp = sum(predicted & actual)
+  fp = sum(predicted & !actual)
+  fn = sum(!predicted & actual)
+  
+  precision = tp / (tp + fp)
+  recall = tp / (tp + fn)
+  f1 = 2 * precision * recall / (precision + recall)
+  
+  list(precision=precision, recall=recall, f1=f1)
+})
 ##############
 
 

@@ -214,8 +214,8 @@ predictions = prediction(wineTree, testData)
 classes = unique(predictions$actual)
 
 stats = sapply(classes, function(class) {
-  predicted = stats$predicted == class
-  actual = stats$actual == class
+  predicted = predictions$predicted == class
+  actual = predictions$actual == class
   
   tp = sum(predicted & actual)
   fp = sum(predicted & !actual)
@@ -225,8 +225,11 @@ stats = sapply(classes, function(class) {
   recall = tp / (tp + fn)
   f1 = 2 * precision * recall / (precision + recall)
   
-  list(precision=precision, recall=recall, f1=f1)
+  c(precision=precision, recall=recall, f1=f1)
 })
+
+stats_averaged = rowSums(stats) / length(classes)
+accuracy = sum(predictions$predicted == predictions$actual) / nrow(testData)
 ##############
 
 

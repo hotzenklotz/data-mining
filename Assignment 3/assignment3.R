@@ -96,21 +96,31 @@ growTree = function(data, edgeValue=NULL) {
   return(internalNode(splitFeature, children, edgeValue, data))
 }
 
-tree_stats <- function(tree) {
-  nodes <- 0
+treeStats <- function(tree) {
+  internalNodes <- 1
   leaves <- 0
+  minDepth <- .Machine$integer.max
+  maxDepth <- 1
   
-  for (child in tree[["children"]]) {
-    if (child[["children"]]) {
-      nodes <- nodes + 1
-      subtree <- tree_stats(child)
-      nodes <- nodes + subtree[1]
-      leaves <- subtree[2]
+  for (child in tree$children) {
+    if ("children" %in% names(child)) {
+      subtree <- treeStats(child)
+      internalNodes <- internalNodes + subtree$internalNodes
+      leaves <- leaves + subtree$leaves
+      maxDepth <- max(maxDepth, 1 + subtree$maxDepth)
+      minDepth <- min(minDepth, 1 + subtree$minDepth)
     } else {
       leaves <- leaves + 1
+      minDepth <- 1
     }
   }
-  return(c(nodes, leaves))
+  
+  return(list(
+      internalNodes=internalNodes,
+      leaves=leaves,
+      totalNodes=(internalNodes + leaves),
+      maxDepth=maxDepth,
+      minDepth=minDepth))
 }
 
 ### Task 1 ###
@@ -119,6 +129,7 @@ features = c("Textiles", "Gifts", "Price")
 class_feature = "Category"
 
 shoppingTree <- growTree(allData)
+stats <- treeStats(shoppingTree)
 print(shoppingTree)
 ##############
 
@@ -135,5 +146,6 @@ features = c("fixed.acidity", "volatile.acidity", "citric.acid", "residual.sugar
 class_feature = "quality"
 
 wineTree <- growTree(allData)
-print(wineTree)
+stats <- treeStats(wineTree)
+print(stats)
 ##############

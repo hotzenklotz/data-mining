@@ -187,9 +187,14 @@ predictionStats = function(predictions, rows) {
     fp = sum(predicted & !actual)
     fn = sum(!predicted & actual)
     
-    precision = tp / (tp + fp)
-    recall = tp / (tp + fn)
-    if (precision + recall == 0) {
+    if ((tp + fp) == 0) {
+      precision = 0.5
+      recall = 0.5
+    } else {
+      precision = tp / (tp + fp)
+      recall = tp / (tp + fn)
+    }
+    if ((precision + recall) == 0) {
       f1 = 0
     } else {
       f1 = 2 * precision * recall / (precision + recall)
@@ -248,7 +253,7 @@ folds <- 1:k
 progress.bar <- create_progress_bar("text")
 progress.bar$init(k)
 
-for (i in 1:k) {
+allStats = sapply(1:k, function(i) {
   print(i)
   trainingData <- subset(allData, allData$foldId %in% (1:k)[-i])
   testData <- subset(allData, allData$foldId %in% c(i))
@@ -266,7 +271,9 @@ for (i in 1:k) {
   print("=========")
   
   progress.bar$step()
-}
+  predictionStats(predictions, nrow(testData))
+  
+})
 
 
 

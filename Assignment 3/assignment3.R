@@ -64,20 +64,19 @@ entropy <- function(values) {
 # - label (only leaf nodes) Predicted class
 # - edgeValue Value of splitFeature as defined by the parent node
 
-leafNode = function(label, edgeValue, data) {
+leafNode = function(label, edgeValue) {
   return(list(edgeValue=edgeValue, label=label))
 }
 
-internalNode = function(splitFeature, children, edgeValue, data) {
-  return(list(edgeValue=edgeValue, splitFeature=splitFeature, children=children))
+internalNode = function(splitFeature, children, edgeValue, label) {
+  return(list(edgeValue=edgeValue, label=label, splitFeature=splitFeature, children=children))
 }
 
 growTree = function(data, edgeValue=NULL) {
-  
   splitFeature = bestSplit(data)
   
   if (homogeneous(data) || splitFeature == FALSE) {
-    return(leafNode(label(data), edgeValue, data))
+    return(leafNode(label(data), edgeValue))
   }
   
   literals = unique(allData[[splitFeature]])
@@ -89,11 +88,11 @@ growTree = function(data, edgeValue=NULL) {
     if (nrow(dataSubset) > 0) {
       children[[length(children) + 1]] = growTree(dataSubset, literal)
     } else {
-      children[[length(children) + 1]] = leafNode(label(data), literal, dataSubset)
+      children[[length(children) + 1]] = leafNode(label(data), literal)
     }
   }
   
-  return(internalNode(splitFeature, children, edgeValue, data))
+  return(internalNode(splitFeature, children, edgeValue, label(data)))
 }
 
 treeStats <- function(tree) {
@@ -159,6 +158,29 @@ prediction = function(tree, data) {
   return(TP)
 }
 
+# Takes a tree and clones it, except that it removes all leaves which
+# only have leaves as siblings.
+prune = function(tree) {
+  stats = treeStats(tree)
+  
+  if (stats$maxDepth == 1) {
+    # remove Children
+    return(leafNode(tree$label, tree$edgeValue))
+  }
+  
+  children = list()
+  for (child in tree$children) {
+    if ("children" %in% names(child)) {
+      children[[length(children) + 1]] = prune(child)
+    } else {
+      children[[length(children) + 1]] = child
+    }
+  }
+  
+  return(internalNode(
+      tree$splitFeature, children, tree$edgeValue, tree$label))
+}
+
 ### Task 1 ###
 allData = read.csv("data.csv")
 features = c("Textiles", "Gifts", "Price")
@@ -185,7 +207,15 @@ stats <- treeStats(wineTree)
 print(stats)
 ##############
 
+### Task 3 ###
+prunedTree = prune(wineTree)
+print(treeStats(prunedTree))
+##############
+
+
 ### Task 4 ###
 testData = allData[1:200,]
 stats = prediction(wineTree, testData)
 ##############
+
+

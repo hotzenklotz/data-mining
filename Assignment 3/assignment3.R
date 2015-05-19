@@ -93,10 +93,36 @@ growTree = function(data, edgeValue=NULL) {
   return(internalNode(splitFeature, children, edgeValue, data))
 }
 
+tree_stats <- function(tree) {
+  nodes <- 0
+  leaves <- 0
+  
+  for (child in tree[["children"]]) {
+    if (child[["children"]]) {
+      nodes <- nodes + 1
+      subtree <- tree_stats(child)
+      nodes <- nodes + subtree[1]
+      leaves <- subtree[2]
+    } else {
+      leaves <- leaves + 1
+    }
+  }
+  return(c(nodes, leaves))
+}
+
 ### Task 1 ###
 allData = read.csv("data.csv")
 features = c("Textiles", "Gifts", "Price")
 class_feature = "Category"
+
+tree <- growTree(allData)
+print(tree)
+##############
+
+### Task 2 ###
+allData = read.csv("winequality-white.csv")
+features = c("fixed.acidity", "volatile.acidity", "citric.acid", "residual.sugar", "chlorides", "free.sulfur.dioxide", "total.sulfur.dioxide", "density", "pH", "sulphates", "alcohol")
+class_feature = "quality"
 
 tree <- growTree(allData)
 print(tree)

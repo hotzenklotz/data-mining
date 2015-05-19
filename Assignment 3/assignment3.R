@@ -1,5 +1,6 @@
 library(plyr)
 library(infotheo)
+library(matrixStats)
 
 homogeneous = function(data) {
   return(nrow(unique(data[class_feature])) == 1)
@@ -275,7 +276,8 @@ allStats = sapply(1:k, function(i) {
   
 })
 
-
+colSds(t(allStats))
+colMeans(t(allStats))
 
 
 ##############

@@ -171,3 +171,9 @@ wineTree <- growTree(allData)
 stats <- treeStats(wineTree)
 print(stats)
 ##############
+
+
+### Task 3 ###
+prunedTree = prune(wineTree)
+print(treeStats(prunedTree))
+##############

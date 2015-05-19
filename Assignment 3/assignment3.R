@@ -229,7 +229,9 @@ stats = sapply(classes, function(class) {
 })
 
 stats_averaged = rowSums(stats) / length(classes)
-accuracy = sum(predictions$predicted == predictions$actual) / nrow(testData)
+stats_averaged = c(stats_averaged,
+                   accuracy=sum(predictions$predicted == predictions$actual) / nrow(testData))
+
 ##############
 
 

@@ -88,20 +88,30 @@ growTree = function(data, edgeValue=NULL) {
 }
 
 tree_stats <- function(tree) {
-  nodes <- 1
+  internalNodes <- 1
   leaves <- 0
+  minDepth <- .Machine$integer.max
+  maxDepth <- 1
   
   for (child in tree$children) {
     if ("children" %in% names(child)) {
-      nodes <- nodes + 1
       subtree <- tree_stats(child)
-      nodes <- nodes + subtree$nodes
+      internalNodes <- internalNodes + subtree$internalNodes
       leaves <- leaves + subtree$leaves
+      maxDepth <- max(maxDepth, 1 + subtree$maxDepth)
+      minDepth <- min(minDepth, 1 + subtree$minDepth)
     } else {
       leaves <- leaves + 1
+      minDepth <- 1
     }
   }
-  return(list(nodes=nodes, leaves=leaves))
+  
+  return(list(
+      internalNodes=internalNodes,
+      leaves=leaves,
+      totalNodes=(internalNodes + leaves),
+      maxDepth=maxDepth,
+      minDepth=minDepth))
 }
 
 ### Task 1 ###

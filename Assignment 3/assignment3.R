@@ -249,14 +249,21 @@ progress.bar <- create_progress_bar("text")
 progress.bar$init(k)
 
 for (i in 1:k) {
-  print(k)
+  print(i)
   trainingData <- subset(allData, allData$foldId %in% (1:k)[-i])
   testData <- subset(allData, allData$foldId %in% c(i))
   
   wineTree = growTree(trainingData)
   predictions = prediction(wineTree, testData)
-                           
-  predictionStats(predictions, nrow(testData))
+  print(predictionStats(predictions, nrow(testData)))
+  
+  print("-------")
+  
+  prunedTree = prune(wineTree)
+  predictions = prediction(prunedTree, testData)
+  print(predictionStats(predictions, nrow(testData)))
+  
+  print("=========")
   
   progress.bar$step()
 }

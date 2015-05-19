@@ -176,6 +176,35 @@ prune = function(tree) {
       tree$splitFeature, children, tree$edgeValue, tree$label))
 }
 
+predictionStats = function(predictions, rows) {
+  classes = unique(predictions$actual)
+  
+  stats = sapply(classes, function(class) {
+    predicted = predictions$predicted == class
+    actual = predictions$actual == class
+    
+    tp = sum(predicted & actual)
+    fp = sum(predicted & !actual)
+    fn = sum(!predicted & actual)
+    
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+    if (precision + recall == 0) {
+      f1 = 0
+    } else {
+      f1 = 2 * precision * recall / (precision + recall)
+    }
+    
+    c(precision=precision, recall=recall, f1=f1)
+  })
+  
+  stats_averaged = rowSums(stats) / length(classes)
+  stats_averaged = c(stats_averaged,
+                     accuracy=sum(predictions$predicted == predictions$actual) / rows)
+  
+  stats_averaged
+}
+
 ### Task 1 ###
 allData = read.csv("data.csv")
 features = c("Textiles", "Gifts", "Price")
@@ -209,28 +238,31 @@ print(treeStats(prunedTree))
 
 
 ### Task 4 ###
-testData = allData[1:200,]
-predictions = prediction(wineTree, testData)
-classes = unique(predictions$actual)
+# Crossvalidation
 
-stats = sapply(classes, function(class) {
-  predicted = predictions$predicted == class
-  actual = predictions$actual == class
-  
-  tp = sum(predicted & actual)
-  fp = sum(predicted & !actual)
-  fn = sum(!predicted & actual)
-  
-  precision = tp / (tp + fp)
-  recall = tp / (tp + fn)
-  f1 = 2 * precision * recall / (precision + recall)
-  
-  c(precision=precision, recall=recall, f1=f1)
-})
+k = 10
 
-stats_averaged = rowSums(stats) / length(classes)
-stats_averaged = c(stats_averaged,
-                   accuracy=sum(predictions$predicted == predictions$actual) / nrow(testData))
+allData$foldId <- sample(1:k, nrow(allData), replace = TRUE)
+folds <- 1:k
+
+progress.bar <- create_progress_bar("text")
+progress.bar$init(k)
+
+for (i in 1:k) {
+  print(k)
+  trainingData <- subset(allData, allData$foldId %in% (1:k)[-i])
+  testData <- subset(allData, allData$foldId %in% c(i))
+  
+  wineTree = growTree(trainingData)
+  predictions = prediction(wineTree, testData)
+                           
+  predictionStats(predictions, nrow(testData))
+  
+  progress.bar$step()
+}
+
+
+
 
 ##############
 

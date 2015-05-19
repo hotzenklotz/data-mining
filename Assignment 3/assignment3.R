@@ -57,18 +57,18 @@ entropy <- function(values) {
 # - label (only leaf nodes) Predicted class
 # - edgeValue Value of splitFeature as defined by the parent node
 
-leafNode = function(label, edgeValue, data) {
+leafNode = function(label, edgeValue) {
   return(list(edgeValue=edgeValue, label=label))
 }
 
-internalNode = function(splitFeature, children, edgeValue, data) {
-  return(list(edgeValue=edgeValue, splitFeature=splitFeature, children=children))
+internalNode = function(splitFeature, children, edgeValue, label) {
+  return(list(edgeValue=edgeValue, label=label, splitFeature=splitFeature, children=children))
 }
 
 growTree = function(data, edgeValue=NULL) {
   
   if (homogeneous(data)) {
-    return(leafNode(label(data), edgeValue, data))
+    return(leafNode(label(data), edgeValue))
   }
   
   splitFeature = bestSplit(data)
@@ -81,11 +81,11 @@ growTree = function(data, edgeValue=NULL) {
     if (nrow(dataSubset) > 0) {
       children[[length(children) + 1]] = growTree(dataSubset, literal)
     } else {
-      children[[length(children) + 1]] = leafNode(label(data), literal, dataSubset)
+      children[[length(children) + 1]] = leafNode(label(data), literal)
     }
   }
   
-  return(internalNode(splitFeature, children, edgeValue, data))
+  return(internalNode(splitFeature, children, edgeValue, label(data)))
 }
 
 tree_stats <- function(tree) {

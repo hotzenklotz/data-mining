@@ -122,6 +122,29 @@ treeStats <- function(tree) {
       minDepth=minDepth))
 }
 
+# Takes a tree and clones it, except that it removes all leaves which
+# only have leaves as siblings.
+prune = function(tree) {
+  stats = treeStats(tree)
+  
+  if (stats$maxDepth == 1) {
+    # remove Children
+    return(leafNode(tree$label, tree$edgeValue))
+  }
+  
+  children = list()
+  for (child in tree$children) {
+    if ("children" %in% names(child)) {
+      children[[length(children) + 1]] = prune(child)
+    } else {
+      children[[length(children) + 1]] = child
+    }
+  }
+  
+  return(internalNode(
+      tree$splitFeature, children, tree$edgeValue, tree$label))
+}
+
 ### Task 1 ###
 allData = read.csv("data.csv")
 features = c("Textiles", "Gifts", "Price")

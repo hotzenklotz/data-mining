@@ -12,6 +12,7 @@ label = function(data) {
 
 bestSplit = function(data) {
   maxGain <- 0
+  f_best <- FALSE
   
   for(feature in features) {
     
@@ -73,11 +74,12 @@ internalNode = function(splitFeature, children, edgeValue, data) {
 
 growTree = function(data, edgeValue=NULL) {
   
-  if (homogeneous(data)) {
+  splitFeature = bestSplit(data)
+  
+  if (homogeneous(data) || splitFeature == FALSE) {
     return(leafNode(label(data), edgeValue, data))
   }
   
-  splitFeature = bestSplit(data)
   literals = unique(allData[[splitFeature]])
   children = list()
   
@@ -116,8 +118,8 @@ allData = read.csv("data.csv")
 features = c("Textiles", "Gifts", "Price")
 class_feature = "Category"
 
-tree <- growTree(allData)
-print(tree)
+shoppingTree <- growTree(allData)
+print(shoppingTree)
 ##############
 
 ### Task 2 ###
@@ -132,6 +134,6 @@ allData = data.frame(discreteData, wineData[numCols:numCols])
 features = c("fixed.acidity", "volatile.acidity", "citric.acid", "residual.sugar", "chlorides", "free.sulfur.dioxide", "total.sulfur.dioxide", "density", "pH", "sulphates", "alcohol")
 class_feature = "quality"
 
-tree <- growTree(allData)
-print(tree)
+wineTree <- growTree(allData)
+print(wineTree)
 ##############

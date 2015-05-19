@@ -7,7 +7,7 @@ homogeneous = function(data) {
 
 label = function(data) {
   # TODO: return category of max frequency
-  return(data[1,][class_feature])
+  return(data[1,][[class_feature]])
 }
 
 bestSplit = function(data) {
@@ -123,6 +123,42 @@ treeStats <- function(tree) {
       minDepth=minDepth))
 }
 
+prediction = function(tree, data) {
+  TP = 0
+  TN = 0
+  
+  walkTree = function(tree, dataItem) {
+    if ("children" %in% names(tree)) {
+      # Internal Nodes
+      splitFeature = tree$splitFeature
+      value = dataItem[[splitFeature]]
+      
+      for (child in tree$children) {
+        if (value == child$edgeValue) {
+          return(walkTree(child, dataItem))
+        }
+      }
+      
+    } else {
+      # Leaves
+      return(tree$label)
+    }
+  }
+  
+  for (i in 1:nrow(data)) {
+    row = data[i,]
+    correctClass = row[[class_feature]]
+    predictedClass = walkTree(tree, row)
+    print(predictedClass)
+    
+    if (correctClass == predictedClass) {
+      TP = TP + 1
+    }
+  }
+  
+  return(TP)
+}
+
 ### Task 1 ###
 allData = read.csv("data.csv")
 features = c("Textiles", "Gifts", "Price")
@@ -136,7 +172,6 @@ print(shoppingTree)
 ### Task 2 ###
 wineData = read.csv("winequality-white.csv")
 
-
 # discretize all the wine values (except quality) to avoid overfitting
 numCols = ncol(wineData)
 discreteData = discretize(wineData[1:numCols - 1])
@@ -148,4 +183,9 @@ class_feature = "quality"
 wineTree <- growTree(allData)
 stats <- treeStats(wineTree)
 print(stats)
+##############
+
+### Task 4 ###
+testData = allData[1:200,]
+stats = prediction(wineTree, testData)
 ##############

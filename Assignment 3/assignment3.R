@@ -11,14 +11,15 @@ label = function(data) {
 }
 
 bestSplit = function(data) {
-  iMin <- .Machine$double.max
+  maxGain <- 0
+  f_best <- FALSE
   
   for(feature in features) {
     
     splits <- split(data, data[[feature]])
-    imp <- impurity(splits)
-    if (imp < iMin) {
-      iMin <- imp
+    imp <- impurity(data, splits)
+    if (imp > maxGain) {
+      maxGain <- imp
       f_best <- feature
     }
   }
@@ -26,10 +27,15 @@ bestSplit = function(data) {
   f_best
 }
 
-impurity <- function(splits) {
+impurity <- function(data, splits) {
   
   splitRows = sapply(splits, nrow)
   
+  # parent entropy
+  parent_frequencies <- count(data[class_feature])$freq / nrow(data)
+  parent_entropy <- entropy(parent_frequencies)
+  
+  # child entropies
   frequencies <- sapply(splits, function(s) {
     count(s[class_feature])$freq / nrow(s)
   })
@@ -38,7 +44,8 @@ impurity <- function(splits) {
   child_entropies = sapply(frequencies, entropy)
   weighted_average = sum(child_entropies * weights)
   
-  weighted_average
+  # result
+  return(parent_entropy - weighted_average)
 }
 
 entropy <- function(values) {
@@ -66,12 +73,12 @@ internalNode = function(splitFeature, children, edgeValue, label) {
 }
 
 growTree = function(data, edgeValue=NULL) {
+  splitFeature = bestSplit(data)
   
-  if (homogeneous(data)) {
+  if (homogeneous(data) || splitFeature == FALSE) {
     return(leafNode(label(data), edgeValue))
   }
   
-  splitFeature = bestSplit(data)
   literals = unique(allData[[splitFeature]])
   children = list()
   
@@ -88,7 +95,7 @@ growTree = function(data, edgeValue=NULL) {
   return(internalNode(splitFeature, children, edgeValue, label(data)))
 }
 
-tree_stats <- function(tree) {
+treeStats <- function(tree) {
   internalNodes <- 1
   leaves <- 0
   minDepth <- .Machine$integer.max
@@ -96,7 +103,7 @@ tree_stats <- function(tree) {
   
   for (child in tree$children) {
     if ("children" %in% names(child)) {
-      subtree <- tree_stats(child)
+      subtree <- treeStats(child)
       internalNodes <- internalNodes + subtree$internalNodes
       leaves <- leaves + subtree$leaves
       maxDepth <- max(maxDepth, 1 + subtree$maxDepth)
@@ -120,9 +127,9 @@ allData = read.csv("data.csv")
 features = c("Textiles", "Gifts", "Price")
 class_feature = "Category"
 
-tree <- growTree(allData)
-stats <- tree_stats(tree)
-print(tree)
+shoppingTree <- growTree(allData)
+stats <- treeStats(shoppingTree)
+print(shoppingTree)
 ##############
 
 ### Task 2 ###
@@ -137,6 +144,7 @@ allData = data.frame(discreteData, wineData[numCols:numCols])
 features = c("fixed.acidity", "volatile.acidity", "citric.acid", "residual.sugar", "chlorides", "free.sulfur.dioxide", "total.sulfur.dioxide", "density", "pH", "sulphates", "alcohol")
 class_feature = "quality"
 
-tree <- growTree(allData)
-print(tree)
+wineTree <- growTree(allData)
+stats <- treeStats(wineTree)
+print(stats)
 ##############

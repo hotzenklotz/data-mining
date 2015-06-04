@@ -26,7 +26,11 @@ euclidian_distance <- function(point1, point2) {
   return(dist(rbind(point1, point2), method = "euclidian"))
 }
 
-k_means <- function(data, k) {
+manhattan_distance <- function(point1, point2) {
+  return(dist(rbind(point1, point2), method ="manhattan"))
+}
+
+k_means <- function(data, k, dist_func) {
   n_row <- nrow(data)
   means <- data[sample(n_row, k), ]
   iterations = 0
@@ -35,7 +39,7 @@ k_means <- function(data, k) {
     iterations <- iterations + 1
     
     cluster_mapping <- mapply(function(i) {
-      which.min(sapply(1:k, function(j) { euclidian_distance(t(data[i,]), t(means[j,])) }))  
+      which.min(sapply(1:k, function(j) { dist_func(t(data[i,]), t(means[j,])) }))  
     }, 1:n_row)#, mc_cores=4)
     
     new_means <- means
@@ -54,3 +58,18 @@ k_means <- function(data, k) {
   }
   return(list(means=means, cluster_mapping=cluster_mapping, iterations=iterations))
 }
+
+# Task 4 Evaluation
+result = k_means(wine_data, 7, euclidian_distance)
+
+
+sum_square_distance <- function(data, cluster_mapping) {
+  
+  
+}
+
+# Task 5
+mcmapply(function(i) {
+  result <- k_mean(wine_data, i, euclidian_distance)
+  
+}, 2:10, mc_cores=4)

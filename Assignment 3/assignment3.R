@@ -254,7 +254,7 @@ folds <- 1:k
 progress.bar <- create_progress_bar("text")
 progress.bar$init(k)
 
-allStats = sapply(1:k, function(i) {
+allStats = lapply(1:k, function(i) {
   print(i)
   trainingData <- subset(allData, allData$foldId %in% (1:k)[-i])
   testData <- subset(allData, allData$foldId %in% c(i))

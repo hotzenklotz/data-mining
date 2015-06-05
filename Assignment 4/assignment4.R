@@ -149,3 +149,42 @@ barplot(table(nbclust_results$Best.nc[1,])[0:8 > 1],
      main="NbClust results",
      xlab="k",
      ylab="Number of indices that support k")
+
+# 6
+
+data = iris
+labels = data[,ncol(data)]
+classes = levels(labels)
+folds = sapply(1:nrow(data), function(row) (row %% 10))
+
+contingencyTables = lapply(0:9, function(fold) {
+  trainingset = subset(data, folds != fold)
+  testset = subset(data, folds == fold)
+  
+  clustering = k_means(data.matrix(trainingset[,1:ncol(data)-1]), length(classes), euclidian_distance)
+  
+  # Find cluster labels by majority voting, ensuring that no class is assigned twice
+  remainingClasses = classes
+  clusterLabels = sapply(1:length(classes), function(clusterId) {
+    cluster = subset(trainingset, clustering$cluster_mapping == clusterId)
+    remainingClassesCluster = subset(cluster, cluster[, ncol(data)] %in% remainingClasses)
+    frequencies = table(remainingClassesCluster[,ncol(data)])
+    if (max(frequencies) > 0) {
+      majorityClass = names(which.max(frequencies))
+    } else {
+      majorityClass = remainingClasses[1]
+    }
+    remainingClasses <<- remainingClasses[remainingClasses != majorityClass]
+    return(majorityClass)
+  })
+  
+  # testing
+  predictedClasses = apply(data.matrix(testset[,1:ncol(data)-1]), 1, function(row) {
+    cluster = which.min(apply(clustering$means, 1, function(mean) euclidian_distance(mean, row)))
+  })
+  
+  table(sapply(predictedClasses, function(classIndex) clusterLabels[classIndex]), testset$Species)
+})
+
+contingencyTablesSum = contingencyTables[[1]]
+sapply(2:10, function(i) {contingencyTablesSum <<- contingencyTablesSum + contingencyTables[[i]]})

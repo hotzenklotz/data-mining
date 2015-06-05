@@ -100,7 +100,46 @@ evaluate_cluster <- function(clustering_result, distance_func) {
 
 
 # Task 5
-mcmapply(function(i) {
-  result <- k_mean(wine_data, i, euclidian_distance)
-  
-}, 2:10, mc_cores=4)
+results = mcmapply(function(i) {
+  list(
+    mean=k_means(wine_data, i, euclidian_distance),
+    median=k_means(wine_data, i, manhattan_distance))
+}, 2:10, mc.cores=4)
+
+wine_data = data.frame(wine_data)
+
+#results_mean = results[1,]
+#results_mean_1 = results_mean[[1]]
+#points = split(wine_data, results_mean_1$cluster_mapping)
+#points_1 = points[[1]]
+#distances = apply(points_1, 1, function(point) euclidian_distance(point, results_mean_1$means[1,]))
+
+cluster_squared_distances = function(points, mean) {
+  squared_distances_cluster = apply(points, 1, function(point) euclidian_distance(point, mean)^2)
+  sum(squared_distances_cluster)
+}
+
+cluster_manhattan_distances = function(points, mean) {
+  distances_cluster = apply(points, 1, function(point) manhattan_distance(point, mean))
+  sum(distances_cluster)
+}
+
+squared_distances = function(clusterings, cluster_distances) {
+  sapply(clusterings, function(clustering) {
+    clusters = split(wine_data, clustering$cluster_mapping)
+    sum(mapply(cluster_distances, clusters, split(clustering$means, row(clustering$means))))
+  })
+}
+
+plot(2:10, squared_distances(results[1,], cluster_squared_distances),
+     main="K-means clustering",
+     xlab="k",
+     ylab="Sum of square distances")
+
+plot(2:10, squared_distances(results[2,], cluster_manhattan_distances),
+     main="M-medians clustering",
+     xlab="k",
+     ylab="Sum of manhattan distances")
+
+library("NbClust")
+nbclust_results = NbClust(wine_data, min.nc=2, max.nc=10, method="kmeans", index="all")

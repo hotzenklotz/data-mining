@@ -143,3 +143,9 @@ plot(2:10, squared_distances(results[2,], cluster_manhattan_distances),
 
 library("NbClust")
 nbclust_results = NbClust(wine_data, min.nc=2, max.nc=10, method="kmeans", index="all")
+
+
+barplot(table(nbclust_results$Best.nc[1,])[0:8 > 1],
+     main="NbClust results",
+     xlab="k",
+     ylab="Number of indices that support k")

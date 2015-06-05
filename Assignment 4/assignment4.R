@@ -59,14 +59,45 @@ k_means <- function(data, k, dist_func) {
   return(list(means=means, cluster_mapping=cluster_mapping, iterations=iterations))
 }
 
-# Task 4 Evaluation
-result = k_means(wine_data, 7, euclidian_distance)
-
-
-sum_square_distance <- function(data, cluster_mapping) {
+medoid <- function(cluster, distance_func) {
   
-  
+ distances <- matrix(,nrow=nrow(cluster), ncol=ncol(cluster))  
+ #distances <- cluster
+ for (i in 1:nrow(cluster)) {
+   distances[i,] <- sum(
+     mapply(function(j) {
+       distance_func(cluster[i,], cluster[nrow(cluster) - j + 1,])
+     }, 1:nrow(cluster))
+    )
+ }
+ min_distance_index = which.min(distances)
+ return(cluster[min_distance_index, ])
 }
+
+# Task 4 Evaluation
+result_euclidian = k_means(wine_data, 7, euclidian_distance)
+evalutate_cluster(result_euclidian, euclidian_distance)
+
+result_manhattan = k_means(wine_data, 7, manhattan_distance)
+evaluate_cluster(result_manhattan, manhattan_distance)
+
+evaluate_cluster <- function(clustering_result, distance_func) {
+  print("Iterations")
+  print(clustering_result$iterations)
+  
+  mapply(function(i) {
+    cluster <- wine_data[clustering_result$cluster_mapping == i,]
+    cat("######## Cluster ", i, "###########\n")
+    print("number of data points:")
+    print(nrow(cluster))
+    print("Centroids:")
+    print(clustering_result$means)
+    print("Menoids: ")
+    print(medoid(cluster, distance_func))
+    
+  }, 1:7)
+}
+
 
 # Task 5
 mcmapply(function(i) {

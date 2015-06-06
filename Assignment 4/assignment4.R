@@ -108,12 +108,6 @@ results = mcmapply(function(i) {
 
 wine_data = data.frame(wine_data)
 
-#results_mean = results[1,]
-#results_mean_1 = results_mean[[1]]
-#points = split(wine_data, results_mean_1$cluster_mapping)
-#points_1 = points[[1]]
-#distances = apply(points_1, 1, function(point) euclidian_distance(point, results_mean_1$means[1,]))
-
 cluster_squared_distances = function(points, mean) {
   squared_distances_cluster = apply(points, 1, function(point) euclidian_distance(point, mean)^2)
   sum(squared_distances_cluster)
@@ -152,12 +146,12 @@ barplot(table(nbclust_results$Best.nc[1,])[0:8 > 1],
 
 # 6
 
-data = iris
+data = read.csv("winequality-white.csv")#iris
 labels = data[,ncol(data)]
-classes = levels(labels)
+classes = unique(labels)#levels(labels)
 folds = sapply(1:nrow(data), function(row) (row %% 10))
 
-contingencyTables = lapply(0:9, function(fold) {
+contingencyTables = mclapply(0:9, function(fold) {
   trainingset = subset(data, folds != fold)
   testset = subset(data, folds == fold)
   
@@ -169,7 +163,7 @@ contingencyTables = lapply(0:9, function(fold) {
     cluster = subset(trainingset, clustering$cluster_mapping == clusterId)
     remainingClassesCluster = subset(cluster, cluster[, ncol(data)] %in% remainingClasses)
     frequencies = table(remainingClassesCluster[,ncol(data)])
-    if (max(frequencies) > 0) {
+    if ((length(frequencies) != 0) && (max(frequencies) > 0)) {
       majorityClass = names(which.max(frequencies))
     } else {
       majorityClass = remainingClasses[1]
@@ -179,12 +173,16 @@ contingencyTables = lapply(0:9, function(fold) {
   })
   
   # testing
-  predictedClasses = apply(data.matrix(testset[,1:ncol(data)-1]), 1, function(row) {
+  predictedClusters = apply(data.matrix(testset[,1:ncol(data)-1]), 1, function(row) {
     cluster = which.min(apply(clustering$means, 1, function(mean) euclidian_distance(mean, row)))
   })
   
-  table(sapply(predictedClasses, function(classIndex) clusterLabels[classIndex]), testset$Species)
-})
+  predictedClasses = sapply(predictedClusters, function(classIndex) clusterLabels[classIndex])
+  
+  # Columns: predicted, Rows: actual
+  table(
+      factor(testset[,ncol(data)], levels=classes),
+      factor(predictedClasses, levels=classes))
+}, mc.cores=4)
 
-contingencyTablesSum = contingencyTables[[1]]
-sapply(2:10, function(i) {contingencyTablesSum <<- contingencyTablesSum + contingencyTables[[i]]})
+contingencyTablesSum = Reduce(function(a, b) (a+b), contingencyTables, contingencyTables[[1]] * 0)

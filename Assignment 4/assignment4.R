@@ -100,6 +100,15 @@ evaluate_cluster <- function(clustering_result, distance_func) {
 
 
 # Task 5
+normalize = function(data) {
+  data = sweep(data, 2, apply(data, 2, min), "-")
+  data = sweep(data, 2, apply(data, 2, max), "/")
+  data
+}
+
+# Optionally, rescale each feature to [0, 1]
+wine_data = normalize(wine_data)
+
 results = mcmapply(function(i) {
   list(
     mean=k_means(wine_data, i, euclidian_distance),

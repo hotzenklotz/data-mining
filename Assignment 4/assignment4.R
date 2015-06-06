@@ -107,7 +107,7 @@ normalize = function(data) {
 }
 
 # Optionally, rescale each feature to [0, 1]
-wine_data = normalize(wine_data)
+#wine_data = normalize(wine_data)
 
 results = mcmapply(function(i) {
   list(

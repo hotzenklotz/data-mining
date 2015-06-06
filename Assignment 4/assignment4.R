@@ -146,43 +146,49 @@ barplot(table(nbclust_results$Best.nc[1,])[0:8 > 1],
 
 # 6
 
-data = read.csv("winequality-white.csv")#iris
-labels = data[,ncol(data)]
-classes = unique(labels)#levels(labels)
-folds = sapply(1:nrow(data), function(row) (row %% 10))
+getSummedContingencyTable = function(data) {
 
-contingencyTables = mclapply(0:9, function(fold) {
-  trainingset = subset(data, folds != fold)
-  testset = subset(data, folds == fold)
+  labels = data[,ncol(data)]
+  classes = unique(labels)
+  folds = sapply(1:nrow(data), function(row) (row %% 10))
   
-  clustering = k_means(data.matrix(trainingset[,1:ncol(data)-1]), length(classes), euclidian_distance)
+  contingencyTables = mclapply(0:9, function(fold) {
+    trainingset = subset(data, folds != fold)
+    testset = subset(data, folds == fold)
+    
+    clustering = k_means(data.matrix(trainingset[,1:ncol(data)-1]), length(classes), euclidian_distance)
+    
+    # Find cluster labels by majority voting, ensuring that no class is assigned twice
+    remainingClasses = classes
+    clusterLabels = sapply(1:length(classes), function(clusterId) {
+      cluster = subset(trainingset, clustering$cluster_mapping == clusterId)
+      remainingClassesCluster = subset(cluster, cluster[, ncol(data)] %in% remainingClasses)
+      frequencies = table(remainingClassesCluster[,ncol(data)])
+      if ((length(frequencies) != 0) && (max(frequencies) > 0)) {
+        majorityClass = names(which.max(frequencies))
+      } else {
+        majorityClass = remainingClasses[1]
+      }
+      remainingClasses <<- remainingClasses[remainingClasses != majorityClass]
+      return(majorityClass)
+    })
+    
+    # testing
+    predictedClusters = apply(data.matrix(testset[,1:ncol(data)-1]), 1, function(row) {
+      cluster = which.min(apply(clustering$means, 1, function(mean) euclidian_distance(mean, row)))
+    })
+    
+    predictedClasses = sapply(predictedClusters, function(classIndex) clusterLabels[classIndex])
+    
+    # Columns: predicted, Rows: actual
+    table(
+        factor(testset[,ncol(data)], levels=classes),
+        factor(predictedClasses, levels=classes))
+  }, mc.cores=4)
   
-  # Find cluster labels by majority voting, ensuring that no class is assigned twice
-  remainingClasses = classes
-  clusterLabels = sapply(1:length(classes), function(clusterId) {
-    cluster = subset(trainingset, clustering$cluster_mapping == clusterId)
-    remainingClassesCluster = subset(cluster, cluster[, ncol(data)] %in% remainingClasses)
-    frequencies = table(remainingClassesCluster[,ncol(data)])
-    if ((length(frequencies) != 0) && (max(frequencies) > 0)) {
-      majorityClass = names(which.max(frequencies))
-    } else {
-      majorityClass = remainingClasses[1]
-    }
-    remainingClasses <<- remainingClasses[remainingClasses != majorityClass]
-    return(majorityClass)
-  })
-  
-  # testing
-  predictedClusters = apply(data.matrix(testset[,1:ncol(data)-1]), 1, function(row) {
-    cluster = which.min(apply(clustering$means, 1, function(mean) euclidian_distance(mean, row)))
-  })
-  
-  predictedClasses = sapply(predictedClusters, function(classIndex) clusterLabels[classIndex])
-  
-  # Columns: predicted, Rows: actual
-  table(
-      factor(testset[,ncol(data)], levels=classes),
-      factor(predictedClasses, levels=classes))
-}, mc.cores=4)
+  contingencyTablesSum = Reduce(function(a, b) (a+b), contingencyTables, contingencyTables[[1]] * 0)
 
-contingencyTablesSum = Reduce(function(a, b) (a+b), contingencyTables, contingencyTables[[1]] * 0)
+}
+
+irisContingencyTable = getSummedContingencyTable(iris)
+wineContingencyTable = getSummedContingencyTable(read.csv("winequality-white.csv"))

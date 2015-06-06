@@ -190,5 +190,18 @@ getSummedContingencyTable = function(data) {
 
 }
 
+getAccuracy = function(contingencyTable) {
+  sum(diag(contingencyTable)) / sum(contingencyTable)
+}
+
+getPerClassPrecision = function(contingencyTable) {
+  diag(contingencyTable) / rowSums(contingencyTable)
+}
+
 irisContingencyTable = getSummedContingencyTable(iris)
 wineContingencyTable = getSummedContingencyTable(read.csv("winequality-white.csv"))
+
+getAccuracy(irisContingencyTable)
+getPerClassPrecision(irisContingencyTable)
+getAccuracy(wineContingencyTable)
+getPerClassPrecision(wineContingencyTable)

@@ -1,7 +1,43 @@
+install.packages("prob")
 library("parallel")
 library("MASS")
+library("prob")
 
-# task 8
+######## task 4 ############
+
+# save some outcomes of a roulette game
+r = roulette(european = TRUE)
+
+winnings = 0
+rounds = 0
+bet = 1
+winningBets = c()
+
+while(winnings < 3000) {
+
+  # spin the wheel and draw 
+  draw = r[sample(nrow(r), 1), ]
+  
+  if (draw$color == "Red") {
+    winnings = winnings + bet
+    winningBets = c(winningBets, bet)
+    bet = 1
+  } else {
+    winnings = winnings - bet
+    bet = bet * 2
+  }
+  
+  rounds = rounds + 1
+}
+
+print("Rounds")
+print(rounds)
+print("Winning Bets")
+print(winningBets)
+
+plot(table(winningBets), log='x', main = "Winning Bets", xlab = "Single Bets in $", ylab = "Frequency")
+
+########## task 8 ##########
 sigmoid = Vectorize(function(x) {
   1 / (1 + exp(1)^-x)
 })

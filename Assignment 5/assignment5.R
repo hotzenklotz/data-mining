@@ -34,7 +34,7 @@ print("Rounds")
 print(rounds)
 print("Winning Bets")
 print(winningBets)
-
+summary(winningBets)
 plot(table(winningBets), log='x', main = "Winning Bets", xlab = "Single Bets in $", ylab = "Frequency")
 
 ########## task 8 ##########

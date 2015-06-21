@@ -1,7 +1,8 @@
 install.packages("prob")
-library("parallel")
+install.packages("mvtnorm")
 library("MASS")
 library("prob")
+library("mvtnorm")
 
 ######## task 4 ############
 
@@ -36,6 +37,34 @@ print("Winning Bets")
 print(winningBets)
 
 plot(table(winningBets), log='x', main = "Winning Bets", xlab = "Single Bets in $", ylab = "Frequency")
+
+########## task 7 ##########
+
+data = iris[c(1,3,5)]
+dataByClass = split(data, data$Species)
+classes = levels(iris$Species)
+
+classMeans = lapply(dataByClass, function(classData) {
+  colMeans(classData[c(1,2)])
+})
+
+classSigmas = lapply(dataByClass, function(classData) {
+  cov(classData[c(1,2)])
+})
+
+predict = function(instance) {
+  likelihoods = mapply(function(mean, sigma) {
+    dmvnorm(instance, mean, sigma)
+  }, classMeans, classSigmas)
+  
+  classes[which.max(likelihoods)]
+}
+
+predict(c(4.5, 2))
+predict(c(5, 1.5))
+predict(c(5.5, 3))
+predict(c(6, 4.3))
+predict(c(7, 7))
 
 ########## task 8 ##########
 sigmoid = Vectorize(function(x) {

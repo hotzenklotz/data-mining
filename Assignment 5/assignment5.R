@@ -43,7 +43,7 @@ sigmoid = Vectorize(function(x) {
 })
 
 par(mfrow=c(1,2))
-plot(Menarche/Total ~ Age, data=menarche, main="Menarche Age vs Menache / Total", xlab="Age", ylab = "Menarche / Total")
+plot(Menarche/Total ~ Age, data=menarche, main="Menarche Age vs Menarche / Total")
 plot(sigmoid,-10, 10, main="Sigmoid Function")
 
 par(mfrow=c(1,1))
